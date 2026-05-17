@@ -8,13 +8,6 @@ from datetime import datetime
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import requests
-import csv
-import re
-import os
-from io import BytesIO
-from fpdf import FPDF
-from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -111,6 +104,26 @@ def sistema_de_problemas():
     menu = ["Registrar Problema", "Consultar Problemas"]
     opcao = st.sidebar.selectbox("Escolha uma opção", menu)
 
+    # 🔥 MOSTRAR DADOS SALVOS (ESSENCIAL)
+    if st.session_state.get("mostrar"):
+        d = st.session_state.get("dados")
+
+        if d:
+            st.success("✅ Problema registrado com sucesso!")
+
+            st.write(f"📌 Local: {d['lat']}, {d['lon']}")
+            st.write(f"Rua: {d['rua']}, Número: {d['numero']}")
+            st.write(f"Tipo: {d['tipo']}")
+            st.write(f"Descrição: {d['descricao']}")
+            st.write(f"Data: {d['data']}")
+            st.write(f"Status: {d['status']}")
+
+            if "imagem" in d and d["imagem"]:
+                st.image(d["imagem"], width=300)
+
+        # limpa depois de mostrar
+        st.session_state.mostrar = False
+
     if opcao == "Registrar Problema":
         st.subheader("Registrar novo problema")
 
@@ -124,8 +137,7 @@ def sistema_de_problemas():
 
             rua, numero, endereco = obter_nome_rua_com_numero(lat, lon)
 
-            # 🔥 FORM COMEÇA AQUI
-            with st.form("form_problema"):
+            with st.form("form_problema", clear_on_submit=True):
 
                 tipo_problema = st.selectbox(
                     "Tipo de problema",
@@ -139,7 +151,7 @@ def sistema_de_problemas():
                 submitted = st.form_submit_button("Registrar Problema")
 
                 if submitted:
-                    registrar_problema(
+                    dados = registrar_problema(
                         [lat, lon],
                         tipo_problema,
                         descricao,
@@ -148,6 +160,9 @@ def sistema_de_problemas():
                         endereco,
                         imagem
                     )
+
+                    st.session_state.mostrar = True
+                    st.session_state.dados = dados
 
     elif opcao == "Consultar Problemas":
         st.subheader("Problemas registrados")
