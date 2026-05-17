@@ -5,14 +5,28 @@ import datetime
 import folium
 from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
-import sqlite3
-from datetime import datetime
+import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
+from datetime import datetime, timedelta
+import os
+from datetime import datetime
 import matplotlib.pyplot as plt
+import streamlit as st
+import csv
+import re
+import openai
+import sqlite3
+import requests
+from fpdf import FPDF
+from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
+from io import BytesIO
+import os
+from datetime import datetime
+import plotly.graph_objects as go
+
 
 # Conexão com banco
 conn = sqlite3.connect("sdp.db", check_same_thread=False)
