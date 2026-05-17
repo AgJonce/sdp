@@ -1,12 +1,12 @@
 streamlit
+folium
+streamlit-folium
 pandas
 numpy
 requests
 geopy
 matplotlib==3.9.2
 fpdf2
-folium==0.14.0
-streamlit-folium
 PyPDF2
 cryptography
 reportlab
