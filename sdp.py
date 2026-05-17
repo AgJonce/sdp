@@ -25,7 +25,7 @@ cursor = conn.cursor()
 
 # Criar tabela corrigida
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS estoque (
+CREATE TABLE IF NOT EXISTS sdp (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_registro TEXT NOT NULL,
     latitude TEXT,
@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS estoque (
     problema TEXT,
     tipo_problema TEXT,
     descricao TEXT,
-    status TEXT
+    status TEXT,
+    imagem TEXT
 )
 """)
 
@@ -70,15 +71,15 @@ def obter_nome_rua_com_numero(lat, lon):
 
     return "Não encontrado", "Não encontrado", "Não encontrado"
 
-def registrar_problema(localizacao, tipo_problema, descricao, rua, numero, endereco):
+def registrar_problema(localizacao, tipo_problema, descricao, rua, numero, endereco,imagem):
     data_registro = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Inserir no banco
     cursor.execute("""
-    INSERT INTO estoque (
+    INSERT INTO sdp (
         data_registro, latitude, longitude, rua, endereco,
-        problema, tipo_problema, descricao, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        problema, tipo_problema, descricao, status,imagem
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data_registro,
         str(localizacao[0]),
@@ -88,7 +89,8 @@ def registrar_problema(localizacao, tipo_problema, descricao, rua, numero, ender
         tipo_problema,
         tipo_problema,
         descricao,
-        "Não atendido"
+        "Não atendido",
+        str(imagem.name) if imagem else None
     ))
 
     conn.commit()
@@ -101,3 +103,74 @@ def registrar_problema(localizacao, tipo_problema, descricao, rua, numero, ender
     st.write(f"📝 Descrição: {descricao}")
     st.write(f"📅 Data de Registro: {data_registro}")
     st.write(f"📊 Status: Não atendido")
+    st.write(f"📊 Imagem: {imagem}")
+
+def sistema_de_problemas():
+    st.title("📍 Sistema de Problemas Urbanos")
+
+    menu = ["Registrar Problema", "Consultar Problemas"]
+    opcao = st.sidebar.selectbox("Escolha uma opção", menu)
+
+    if opcao == "Registrar Problema":
+        st.subheader("Registrar novo problema")
+
+        mapa = exibir_mapa()
+
+        if mapa and mapa.get("last_clicked"):
+            lat = mapa["last_clicked"]["lat"]
+            lon = mapa["last_clicked"]["lng"]
+
+            st.write(f"📌 Local selecionado: {lat}, {lon}")
+
+            rua, numero, endereco = obter_nome_rua_com_numero(lat, lon)
+
+            # 🔥 FORM COMEÇA AQUI
+            with st.form("form_problema"):
+
+                tipo_problema = st.selectbox(
+                    "Tipo de problema",
+                    [" ","Buraco na rua", "Iluminação", "Lixo", "Esgoto", "Outro"]
+                )
+
+                descricao = st.text_area("Descrição")
+
+                imagem = st.file_uploader("Imagem")
+
+                submitted = st.form_submit_button("Registrar Problema")
+
+                if submitted:
+                    registrar_problema(
+                        [lat, lon],
+                        tipo_problema,
+                        descricao,
+                        rua,
+                        numero,
+                        endereco,
+                        imagem
+                    )
+
+    elif opcao == "Consultar Problemas":
+        st.subheader("Problemas registrados")
+
+        df = pd.read_sql("SELECT * FROM sdp", conn)
+
+        if df.empty:
+            st.warning("Nenhum problema registrado ainda.")
+        else:
+            st.dataframe(df)
+
+            # Mapa com pontos
+            mapa = folium.Map(location=[-20.7029, -42.0105], zoom_start=13)
+
+            for _, row in df.iterrows():
+                folium.Marker(
+                    location=[float(row["latitude"]), float(row["longitude"])],
+                    popup=f"{row['tipo_problema']} - {row['status']}"
+                ).add_to(mapa)
+
+            st_folium(mapa, width=700, height=500)
+def main():
+    sistema_de_problemas()
+
+if __name__ == "__main__":
+    main()
