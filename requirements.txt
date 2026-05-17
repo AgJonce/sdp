@@ -3,11 +3,10 @@ openai==0.28
 requests
 geopy
 matplotlib==3.9.2
-fpdf 
+fpdf2
 folium
-datetime
-streamlit_folium
+streamlit-folium
 PyPDF2
 cryptography
 reportlab
-Plotly
+plotly
