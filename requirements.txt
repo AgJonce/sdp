@@ -1,0 +1,12 @@
+streamlit
+openai==0.28
+requests
+geopy
+matplotlib==3.9.2
+fpdf2
+folium
+streamlit-folium
+PyPDF2
+cryptography
+reportlab
+plotly
