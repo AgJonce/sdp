@@ -5,8 +5,8 @@ requests
 geopy
 matplotlib==3.9.2
 fpdf2
-folium
-streamlit-folium
+folium==0.14.0
+streamlit-folium==0.15.0
 PyPDF2
 cryptography
 reportlab
