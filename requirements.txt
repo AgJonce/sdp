@@ -1,5 +1,6 @@
 streamlit
-openai==0.28
+pandas
+numpy
 requests
 geopy
 matplotlib==3.9.2
@@ -10,3 +11,4 @@ PyPDF2
 cryptography
 reportlab
 plotly
+openai==0.28
